@@ -77,3 +77,13 @@ const withPWA = require('next-pwa')({
 });
 
 module.exports = withPWA(nextConfig);
+
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  swcMinify: false, // 禁用 SWC 压缩
+  compiler: {
+    removeConsole: false, // 可选
+  },
+};
+
+module.exports = nextConfig;
