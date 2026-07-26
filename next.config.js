@@ -3,18 +3,25 @@
 
 const nextConfig = {
   output: 'standalone',
+
   eslint: {
     dirs: ['src'],
   },
 
   reactStrictMode: false,
+
+  // ⭐ 禁用 SWC（ARMv7 必须）
   swcMinify: false,
+
+  // ⭐ 强制使用 Babel
+  compiler: {
+    removeConsole: false,
+  },
 
   experimental: {
     instrumentationHook: process.env.NODE_ENV === 'production',
   },
 
-  // Uncoment to add domain whitelist
   images: {
     unoptimized: true,
     remotePatterns: [
@@ -69,6 +76,7 @@ const nextConfig = {
   },
 };
 
+// ⭐ 保留 next-pwa 包装
 const withPWA = require('next-pwa')({
   dest: 'public',
   disable: process.env.NODE_ENV === 'development',
@@ -77,13 +85,3 @@ const withPWA = require('next-pwa')({
 });
 
 module.exports = withPWA(nextConfig);
-
-/** @type {import('next').NextConfig} */
-const nextConfig = {
-  swcMinify: false, // 禁用 SWC 压缩
-  compiler: {
-    removeConsole: false, // 可选
-  },
-};
-
-module.exports = nextConfig;
