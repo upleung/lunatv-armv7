@@ -2,6 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ⭐ 新增：Inter 字体类（替代 next/font） */
+.font-inter {
+  font-family: 'Inter', sans-serif;
+}
+
 @layer utilities {
   .scrollbar-hide {
     -ms-overflow-style: none; /* IE and Edge */
@@ -21,7 +26,6 @@ html,
 body {
   height: 100%;
   overflow-x: hidden;
-  /* 阻止 iOS Safari 拉动回弹 */
   overscroll-behavior: none;
 }
 
@@ -42,7 +46,6 @@ html:not(.dark) body {
   background-attachment: fixed;
 }
 
-/* 自定义滚动条样式 */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -61,7 +64,6 @@ html:not(.dark) body {
   background: rgba(107, 114, 128, 0.5);
 }
 
-/* 视频卡片悬停效果 */
 .video-card-hover {
   transition: transform 0.3s ease;
 }
@@ -70,7 +72,6 @@ html:not(.dark) body {
   transform: scale(1.05);
 }
 
-/* 渐变遮罩 */
 .gradient-overlay {
   background: linear-gradient(
     to bottom,
@@ -79,31 +80,28 @@ html:not(.dark) body {
   );
 }
 
-/* 隐藏移动端（<768px）垂直滚动条 */
 @media (max-width: 767px) {
   html,
   body {
-    -ms-overflow-style: none; /* IE & Edge */
-    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
 
   html::-webkit-scrollbar,
   body::-webkit-scrollbar {
-    display: none; /* Chrome Safari */
+    display: none;
   }
 }
 
-/* 隐藏所有滚动条（兼容 WebKit、Firefox、IE/Edge） */
 * {
-  -ms-overflow-style: none; /* IE & Edge */
-  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 *::-webkit-scrollbar {
-  display: none; /* Chrome, Safari, Opera */
+  display: none;
 }
 
-/* View Transitions API 动画 */
 @keyframes slide-from-top {
   from {
     clip-path: polygon(0 0, 100% 0, 100% 0, 0 0);
@@ -129,38 +127,30 @@ html:not(.dark) body {
   animation-fill-mode: both;
 }
 
-/*
-  切换时，旧的视图不应该有动画，它应该在下面，等待被新的视图覆盖。
-  这可以防止在动画完成前，页面底部提前变色。
-*/
 ::view-transition-old(root) {
   animation: none;
 }
 
-/* 从浅色到深色：新内容（深色）从顶部滑入 */
 html.dark::view-transition-new(root) {
   animation-name: slide-from-top;
 }
 
-/* 从深色到浅色：新内容（浅色）从底部滑入 */
 html:not(.dark)::view-transition-new(root) {
   animation-name: slide-from-bottom;
 }
 
-/* 强制播放器内部的 video 元素高度为 100%，并保持内容完整显示 */
 div[data-media-provider] video {
   height: 100%;
   object-fit: contain;
 }
 
 .art-poster {
-  background-size: contain !important; /* 使图片完整展示 */
-  background-position: center center !important; /* 居中显示 */
-  background-repeat: no-repeat !important; /* 防止重复 */
-  background-color: #000 !important; /* 其余区域填充为黑色 */
+  background-size: contain !important;
+  background-position: center center !important;
+  background-repeat: no-repeat !important;
+  background-color: #000 !important;
 }
 
-/* 隐藏移动端竖屏时的 pip 按钮 */
 @media (max-width: 768px) {
   .art-control-pip {
     display: none !important;
