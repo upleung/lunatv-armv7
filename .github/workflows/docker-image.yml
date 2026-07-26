@@ -29,10 +29,6 @@ jobs:
     strategy:
       matrix:
         include:
-          - platform: linux/amd64
-            os: ubuntu-latest
-          - platform: linux/arm64
-            os: ubuntu-24.04-arm
           - platform: linux/arm/v7
             os: ubuntu-latest
 
@@ -55,7 +51,7 @@ jobs:
       - name: Checkout source code
         uses: actions/checkout@v4
 
-      # 1. 添加 QEMU 模拟器支持（用于支持 armv7 等非原生架构的交叉编译）
+      # 添加 QEMU 模拟器支持（用于在 x86_64 环境下交叉编译 armv7）
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
