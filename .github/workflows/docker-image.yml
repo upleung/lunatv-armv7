@@ -51,11 +51,9 @@ jobs:
       - name: Checkout source code
         uses: actions/checkout@v4
 
-      # ⭐ 加速点 1：启用 QEMU（必须）
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
-      # ⭐ 加速点 2：启用 Buildx + BuildKit 高性能模式
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
         with:
@@ -64,6 +62,7 @@ jobs:
             image=moby/buildkit:latest
             network=host
 
+      # 1. 登录到 GitHub Container Registry
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v3
         with:
@@ -71,21 +70,31 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      # 2. 登录到 Docker Hub
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
       - name: Set lowercase repository owner
         id: lowercase
         run: echo "owner=$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_OUTPUT"
 
+      # 3. 提取 Metadata，同时生成 GHCR 和 Docker Hub 的标签
       - name: Extract metadata
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ghcr.io/mcgtekwrt/lunatv-armv7
+          images: |
+            ghcr.io/${{ steps.lowercase.outputs.owner }}/lunatv-armv7
+            mcgtekwrt/lunatv-armv7
           tags: |
             type=raw,value=${{ github.event.inputs.tag || 'latest' }},enable={{is_default_branch}}
             type=semver,pattern={{version}},enable=${{ github.event_name == 'release' }}
             type=semver,pattern={{major}}.{{minor}},enable=${{ github.event_name == 'release' }}
 
-      # ⭐ 加速点 3：启用 GHCR 缓存（核心加速 2～3 倍）
+      # 4. 构建并通过 Digest 并行推送至两个平台
       - name: Build and push by digest
         id: build
         uses: docker/build-push-action@v5
@@ -94,10 +103,12 @@ jobs:
           file: ./Dockerfile
           platforms: ${{ matrix.platform }}
           labels: ${{ steps.meta.outputs.labels }}
-          tags: ghcr.io/mcgtekwrt/lunatv-armv7:${{ steps.docker-tag.outputs.tag }}
-          cache-from: type=registry,ref=ghcr.io/mcgtekwrt/lunatv-armv7:cache
-          cache-to: type=registry,ref=ghcr.io/mcgtekwrt/lunatv-armv7:cache,mode=max
-          outputs: type=image,name=ghcr.io/mcgtekwrt/lunatv-armv7,name-canonical=true,push=true
+          tags: |
+            ghcr.io/${{ steps.lowercase.outputs.owner }}/lunatv-armv7:${{ steps.docker-tag.outputs.tag }}
+            mcgtekwrt/lunatv-armv7:${{ steps.docker-tag.outputs.tag }}
+          cache-from: type=registry,ref=ghcr.io/${{ steps.lowercase.outputs.owner }}/lunatv-armv7:cache
+          cache-to: type=registry,ref=ghcr.io/${{ steps.lowercase.outputs.owner }}/lunatv-armv7:cache,mode=max
+          outputs: type=image,"name=ghcr.io/${{ steps.lowercase.outputs.owner }}/lunatv-armv7,docker.io/mcgtekwrt/lunatv-armv7",name-canonical=true,push=true
 
       - name: Export digest
         run: |
@@ -128,12 +139,19 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      # Merge 阶段同样需要分别登录两个镜像仓库
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Set lowercase repository owner
         id: lowercase
@@ -148,11 +166,18 @@ jobs:
             echo "tag=${{ github.event.inputs.tag || 'latest' }}" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Create manifest list and push
+      # 5. 分别创建并推送两个平台的 Manifest List
+      - name: Create manifest list and push (GHCR)
         working-directory: /tmp/digests
         run: |
-          docker buildx imagetools create -t ghcr.io/mcgtekwrt/lunatv-armv7:${{ steps.docker-tag.outputs.tag }} \
-            $(printf 'ghcr.io/mcgtekwrt/lunatv-armv7@sha256:%s ' *)
+          docker buildx imagetools create -t ghcr.io/${{ steps.lowercase.outputs.owner }}/lunatv-armv7:${{ steps.docker-tag.outputs.tag }} \
+            $(printf 'ghcr.io/${{ steps.lowercase.outputs.owner }}/lunatv-armv7@sha256:%s ' *)
+
+      - name: Create manifest list and push (Docker Hub)
+        working-directory: /tmp/digests
+        run: |
+          docker buildx imagetools create -t mcgtekwrt/lunatv-armv7:${{ steps.docker-tag.outputs.tag }} \
+            $(printf 'mcgtekwrt/lunatv-armv7@sha256:%s ' *)
 
   cleanup-refresh:
     runs-on: ubuntu-latest
