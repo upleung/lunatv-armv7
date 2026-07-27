@@ -51,12 +51,18 @@ jobs:
       - name: Checkout source code
         uses: actions/checkout@v4
 
-      # 添加 QEMU 模拟器支持（用于在 x86_64 环境下交叉编译 armv7）
+      # ⭐ 加速点 1：启用 QEMU（必须）
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
+      # ⭐ 加速点 2：启用 Buildx + BuildKit 高性能模式
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
+        with:
+          install: true
+          driver-opts: |
+            image=moby/buildkit:latest
+            network=host
 
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v3
@@ -79,6 +85,7 @@ jobs:
             type=semver,pattern={{version}},enable=${{ github.event_name == 'release' }}
             type=semver,pattern={{major}}.{{minor}},enable=${{ github.event_name == 'release' }}
 
+      # ⭐ 加速点 3：启用 GHCR 缓存（核心加速 2～3 倍）
       - name: Build and push by digest
         id: build
         uses: docker/build-push-action@v5
@@ -88,6 +95,8 @@ jobs:
           platforms: ${{ matrix.platform }}
           labels: ${{ steps.meta.outputs.labels }}
           tags: ghcr.io/mcgtekwrt/lunatv-armv7:${{ steps.docker-tag.outputs.tag }}
+          cache-from: type=registry,ref=ghcr.io/mcgtekwrt/lunatv-armv7:cache
+          cache-to: type=registry,ref=ghcr.io/mcgtekwrt/lunatv-armv7:cache,mode=max
           outputs: type=image,name=ghcr.io/mcgtekwrt/lunatv-armv7,name-canonical=true,push=true
 
       - name: Export digest
