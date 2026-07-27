@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import type { Metadata, Viewport } from 'next';
-
+import type { Metadata } from 'next';
 import './globals.css';
 
 import { getConfig } from '@/lib/config';
@@ -28,7 +27,8 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export const viewport: Viewport = {
+// 修复：Next.js 13.5 没有 Viewport 类型，直接导出对象即可
+export const viewport = {
   viewportFit: 'cover',
 };
 
@@ -58,6 +58,7 @@ export default async function RootLayout({
     type: 'movie' | 'tv';
     query: string;
   }[];
+
   if (storageType !== 'localstorage') {
     const config = await getConfig();
     siteName = config.SiteConfig.SiteName;
@@ -100,7 +101,7 @@ export default async function RootLayout({
           content='width=device-width, initial-scale=1.0, viewport-fit=cover'
         />
 
-        {/* 使用普通 CSS 字体（Inter） */}
+        {/* ⭐ 使用 Google Fonts（替代 next/font） */}
         <link
           href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap"
           rel="stylesheet"
@@ -117,6 +118,7 @@ export default async function RootLayout({
         />
       </head>
 
+      {/* ⭐ 使用 .font-inter（globals.css 中定义） */}
       <body className="min-h-screen bg-white text-gray-900 dark:bg-black dark:text-gray-200 font-inter">
         <ThemeProvider
           attribute='class'
