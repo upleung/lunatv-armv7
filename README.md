@@ -1,4 +1,4 @@
-# MoonTV (Armv7 适配版)
+# MoonTV (Arm v7 适配版)
 
 <div align="center">
   <img src="public/logo.png" alt="MoonTV Logo" width="120">
