@@ -1,10 +1,10 @@
 name: Build & Push Docker Image
 
 on:
-  push:
-    branches:
-      - main
-      - master
+  # push:
+  #   branches:
+  #     - main
+  #     - master
 
   release:
     types:
