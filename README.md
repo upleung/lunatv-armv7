@@ -349,3 +349,10 @@ v100.0.0 以上版本可配合 [Selene](https://github.com/MoonTechLab/Selene) �
 ## Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=upleung/lunatv-armv7&type=Date)](https://www.star-history.com/#upleung/lunatv-armv7&Date)
+
+## 🐳 Docker Hub 实时数据
+
+[![Docker Pulls](https://img.shields.io/docker/pulls/mcgtekwrt/lunatv-armv7?style=for-the-badge&logo=docker&color=2496ED)](https://hub.docker.com/r/mcgtekwrt/lunatv-armv7)
+[![Docker Image Size](https://img.shields.io/docker/image-size/mcgtekwrt/lunatv-armv7/latest?style=for-the-badge&logo=docker&color=2496ED)](https://hub.docker.com/r/mcgtekwrt/lunatv-armv7)
+
+> 本镜像的拉取次数与镜像体积数据由 Docker Hub 实时同步更新。
